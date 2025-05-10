@@ -1,0 +1,92 @@
+Below is the **full final model** in a single block that should render in this chat (no numbered tags, no `align`/`tag` commands that upset the renderer):
+
+$$
+\begin{aligned}
+\textbf{Auxiliary\ definitions:}\qquad
+I_{\text{eff}} &= \frac{I}{\bigl(1 + A/K_R\bigr)\bigl(1 + T/K_\tau\bigr)} \\[4pt]
+V_{\text{IDE}}(I) &= V_0\!\left(1 + \rho\,\frac{I}{K_\rho + I}\right) \\[10pt]
+\textbf{Dynamics:}\qquad
+\frac{dI}{dt} &= \frac{S_0}{1 + I/K_{\text{BBB}}}
+                \;-\; k_{\text{clr}}\,I
+                \;-\;
+                \frac{V_{\text{IDE}}(I)\,I}
+                     {K_I \bigl(1 + A/K_A\bigr) + I} \\[10pt]
+\frac{dA}{dt} &= \bigl(S_{A0} - \sigma I\bigr)
+                \;-\; \mu A
+                \;-\;
+                \frac{V_{\text{IDE}}(I)\,A}
+                     {K_A + A}\,
+                \frac{1}{1 + I/K_I} \\[10pt]
+\frac{dT}{dt} &= k_{\text{phos}}\,
+                \frac{1}
+                     {1 + \bigl(I_{\text{eff}}/I_{50}\bigr)^{n}}
+                \;+\; \gamma A
+                \;-\; k_{\text{deph}}\,T
+\end{aligned}
+$$
+
+---
+
+## What every symbol means and why it appears
+
+### State variables  
+| Symbol | Description |
+|--------|-------------|
+| **\(I(t)\)** | Brain interstitial insulin concentration. |
+| **\(A(t)\)** | Extracellular / soluble amyloid-β. |
+| **\(T(t)\)** | Hyper-phosphorylated tau. |
+
+### Auxiliary expressions  
+
+* **\(I_{\text{eff}}\)** – “functional” insulin available for signalling after two kinds of interference:  
+  * receptor masking by Aβ (factor \(1+A/K_R\)),  
+  * signalling loss caused by pathological tau (factor \(1+T/K_\tau\)).  
+  Both mechanisms are described in the third paper; putting them in the denominator reduces the inhibitory power of insulin when Aβ or tau is high.
+
+* **\(V_{\text{IDE}}(I)\)** – **insulin-induced up-regulation of IDE** (PI3 K pathway). It uses a standard Michaelis–Menten–like rise with maximum increase factor \(\rho\) and half-activation constant \(K_\rho\).
+
+### Parameters: where they come from and intuition  
+
+| Group | Symbols & intuition |
+|-------|--------------------|
+| **Transport / clearance** | \(S_0\) (baseline insulin influx across BBB); \(K_{\text{BBB}}\) (feedback: hyper-insulinaemia saturates BBB transport); \(k_{\text{clr}}\) (non-IDE insulin clearance). |
+| **IDE kinetics** | \(V_0\) (basal maximum IDE rate); \(\rho, K_\rho\) (insulin-driven IDE induction); \(K_I, K_A\) (Michaelis constants for insulin and Aβ at IDE active site). |
+| **Production / loss of Aβ** | \(S_{A0}\) (baseline Aβ generation); \(\sigma\) (how strongly insulin suppresses secretase activity / promotes APP trafficking); \(\mu\) (all other Aβ clearance routes). |
+| **Kinase / phosphatase balance** | \(k_{\text{phos}}\) (aggregate activity of GSK-3β + JNK etc.); \(k_{\text{deph}}\) (PP2A/PP1-driven dephosphorylation). |
+| **Cross-talk constants** | \(K_R\) (Aβ concentration that halves insulin-receptor availability); \(K_\tau\) (tau concentration that halves downstream insulin signalling); \(I_{50}, n\) (half-inhibitory insulin level and Hill slope for kinase inhibition); \(\gamma\) (strength of the direct Aβ → tau-P drive). |
+
+### Why each equation looks the way it does
+
+1. **Insulin (\(dI/dt\))**  
+   * **Influx term** \(S_0/(1+I/K_{\text{BBB}})\) captures the BBB transporter slowing when brain insulin is already high.  
+   * **First-order clearance** \(k_{\text{clr}}I\) represents receptor-mediated endocytosis and other non-IDE losses.  
+   * **IDE competition** – Michaelis–Menten with a denominator multiplied by \((1+A/K_A)\) to show that Aβ competes for the same catalytic site.
+
+2. **Aβ (\(dA/dt\))**  
+   * **Baseline generation** \(S_{A0}\).  
+   * **Insulin-suppression** \(-\sigma I\) (insulin speeds up non-amyloidogenic APP traffic and curbs secretase activity).  
+   * **First-order loss** \(-\mu A\).  
+   * **IDE term** mirrors insulin’s, but is *also* weakened when insulin occupies IDE – hence the extra factor \(1/(1+I/K_I)\).
+
+3. **Tau-P (\(dT/dt\))**  
+   * **Hill inhibition** \(k_{\text{phos}}\,[1 + (I_{\text{eff}}/I_{50})^{n}]^{-1}\):  
+     *Kinase activity (GSK-3β, JNK) falls sigmoidally as functional insulin rises.*  
+     *Using a Hill function lets the model flexibly fit steep or shallow kinase responses without adding another differential equation.*  
+   * **Direct Aβ drive** \(+\gamma A\) (Aβ/TNFα/JNK pathway).  
+   * **First-order dephosphorylation** \(-k_{\text{deph}}T\) by PP2A/PP1.
+
+---
+
+### Putting it all together
+
+* **Positive loops**  
+  * High insulin → **↑ IDE** → faster insulin clearance (self-limiting) **and** faster Aβ clearance (protective).  
+  * Aβ and tau each lower **\(I_{\text{eff}}\)**, which weakens kinase inhibition → more tau-P, closing a harmful feedback.
+
+* **Therapeutic handles**  
+  * **IDE activator**: ↑\(V_0\) or ↑\(\rho\).  
+  * **Insulin sensitiser / intranasal insulin**: transient ↑\(S_0\) plus ↓\(K_R,K_\tau\).  
+  * **Secretase inhibitor**: ↓\(S_{A0}\) or ↓\(\sigma\).  
+  * **GSK-3β inhibitor**: ↓\(k_{\text{phos}}\).  
+
+Because every term comes straight from mechanisms explicitly reported in the three reviews—and the maths uses canonical kinetic (Michaelis–Menten) and regulatory (Hill) forms familiar in systems biology—the model is ready for parameter fitting or in-silico perturbation studies.
