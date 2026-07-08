@@ -6,6 +6,8 @@ using DataFrames
 
 export example, parameter_sensitivity, plot_results, healthy_initial_conditions, insulin_resistant_initial_conditions, default_parameters, run_simulation
 
+# plotlyjs()
+
 """
 Alzheimer's Disease Energy Metabolism Model
 Based on the interactions between insulin signaling, amyloid-β, tau phosphorylation,
@@ -326,6 +328,22 @@ function plot_results(sol, title="")
     plot(p1, p2, p3, p4, p5, p6, p7, layout=(4,2), size=(1600, 1000), plot_title=title)
 end
 
+function phase_portrait(sol, title="")
+    I = sol[1,:]
+    AB = sol[2,:]
+    T = sol[3,:]
+
+    pp = plot3d(I, AB, T, 
+       xlabel="Insulin", ylabel="Aβ", zlabel="τp",
+       title="$title Phase Space Trajectory",
+       legend=true)
+
+    scatter3d!(pp, [I[end]], [AB[end]], [T[end]], 
+           markersize=8, color=:red, label="End")
+
+    pp
+end
+
 # Parameter sensitivity analysis function
 function parameter_sensitivity(param_idx, param_range, u0=healthy_initial_conditions())
     """
@@ -372,10 +390,15 @@ function example()
     println("3. Creating plots...")
     p_healthy = plot_results(sol_healthy, "Healthy")
     p_resistant = plot_results(sol_resistant, "Insulin Resistant")
+
+    healthy_phase_portrait = phase_portrait(sol_healthy, "Healthy")
+    resistant_phase_portrait = phase_portrait(sol_resistant, "Resistant")
     
     # Display plots
     display(p_healthy)
     display(p_resistant)
+    display(healthy_phase_portrait)
+    display(resistant_phase_portrait)
     
     # Example sensitivity analysis
     println("\n4. Running sensitivity analysis for IDE level...")
